@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CosmoBlitz</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+</head>
+
+<body>
+
+    <div id="home-screen">
+        <!-- Starfield background canvas -->
+        <canvas id="starfield" class="starfield-canvas"></canvas>
+
+        <!-- Scanline overlay for retro effect -->
+        <div class="scanlines"></div>
+
+        <!-- Animated ship (top area) -->
+        <div class="ship-scene">
+            <div class="ship-wrapper" id="shipWrapper">
+                <img src="assets/images/destroyer/shipforboss.png" class="hero-ship" id="heroShip" alt="Player Ship">
+                <!-- Bullets container -->
+                <div class="bullets-container" id="bulletsContainer"></div>
+                <!-- Engine glow -->
+                <div class="engine-glow"></div>
+            </div>
+        </div>
+
+        <!-- Title -->
+        <div class="title-block">
+            <div class="title-orbit-ring"></div>
+            <h1 class="game-title">
+                <span class="title-nebula">Cosmo</span><span class="title-strike">Blitz</span>
+            </h1>
+            <p class="game-subtitle">DEFEND THE GALAXY</p>
+        </div>
+
+        <!-- Boss alien (lower area) -->
+        <div class="boss-scene">
+            <div class="boss-wrapper" id="bossWrapper">
+                <img src="assets/images/alien/finalboss.png" class="hero-boss" id="heroBoss" alt="Final Boss">
+                <!-- Boss glow aura -->
+                <div class="boss-aura"></div>
+            </div>
+        </div>
+
+
+
+        <!-- Bottom UI -->
+        <div class="menu-ui">
+            <button id="start-btn">START GAME</button>
+            <div class="high-score-box">
+                HIGH SCORE: <span id="hi-score-val">0</span>
+            </div>
+        </div>
+
+        <button id="sound-toggle-btn" class="sound-toggle-btn" title="Toggle Sound">🔊</button>
+    </div>
+
+    <div id="hud" style="display: none;">
+        <div>SCORE: <span id="score">0</span></div>
+        <div>PHASE: <span id="phase">1</span></div>
+    </div>
+
+    <div id="game-over-screen" style="display: none;">
+        <h1 class="game-over-title">GAME OVER</h1>
+        <p class="final-score-text">SCORE: <span id="final-score-val">0</span></p>
+        <div class="menu-ui">
+            <button id="try-again-btn" class="neon-btn">TRY AGAIN</button>
+            <button id="back-to-menu-btn" class="neon-btn">BACK</button>
+        </div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script src="game.js"></script>
+
+    <script>
+        // ── Starfield canvas ──────────────────────────────────────────
+        (function () {
+            const canvas = document.getElementById('starfield');
+            const ctx = canvas.getContext('2d');
+            let stars = [];
+
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            for (let i = 0; i < 160; i++) {
+                stars.push({
+                    x: Math.random(),
+                    y: Math.random(),
+                    r: Math.random() * 1.6 + 0.2,
+                    speed: Math.random() * 0.00012 + 0.00004,
+                    alpha: Math.random() * 0.7 + 0.3,
+                    twinkleSpeed: Math.random() * 0.02 + 0.005,
+                    twinklePhase: Math.random() * Math.PI * 2
+                });
+            }
+
+            function drawStars(t) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                stars.forEach(s => {
+                    s.twinklePhase += s.twinkleSpeed;
+                    const alpha = s.alpha * (0.6 + 0.4 * Math.sin(s.twinklePhase));
+                    s.y += s.speed;
+                    if (s.y > 1) { s.y = 0; s.x = Math.random(); }
+                    ctx.beginPath();
+                    ctx.arc(s.x * canvas.width, s.y * canvas.height, s.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(200, 220, 255, ${alpha})`;
+                    ctx.fill();
+                });
+                requestAnimationFrame(drawStars);
+            }
+            requestAnimationFrame(drawStars);
+        })();
+
+        // ── Bullet spawner ────────────────────────────────────────────
+        (function () {
+            const container = document.getElementById('bulletsContainer');
+            const shipWrapper = document.getElementById('shipWrapper');
+
+            function spawnBullet() {
+                if (!document.getElementById('home-screen') ||
+                    document.getElementById('home-screen').style.display === 'none') return;
+
+                const bullet = document.createElement('div');
+                bullet.className = 'menu-bullet';
+                // slight random x offset so bullets spread a little
+                const offset = (Math.random() - 0.5) * 24;
+                bullet.style.setProperty('--bx', offset + 'px');
+                container.appendChild(bullet);
+
+                // Remove after animation ends
+                bullet.addEventListener('animationend', () => bullet.remove());
+            }
+
+            // Fire bullets on a random interval between 400ms and 1200ms
+            function scheduleNext() {
+                const delay = 400 + Math.random() * 800;
+                setTimeout(() => {
+                    spawnBullet();
+                    scheduleNext();
+                }, delay);
+            }
+            // Initial burst
+            setTimeout(scheduleNext, 600);
+        })();
+    </script>
+</body>
+
+</html>
