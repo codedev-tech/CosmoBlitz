@@ -969,17 +969,22 @@ function updateEscortEnemy(enemy) {
 
 // Draw laser charge circle on the right side
 function drawLaserChargeCircle() {
-    const circleRadius = 45;
-    const circleCenterX = canvas.width - 70;
-    const circleCenterY = canvas.height - 100;
+    const circleRadius = 30;
+    const circleCenterX = canvas.width - 50;
+    const circleCenterY = canvas.height - 80;
     const requiredKills = 10;
     const chargePercent = Math.min(laserKills / requiredKills, 1); // 0 to 1, stays at 1 after reaching requiredKills
     const isFull = chargePercent >= 1;
     
     // Draw background circle
     ctx.save();
+    // Add shadow effect
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+    ctx.shadowBlur = 12;
+    ctx.shadowOffsetX = 3;
+    ctx.shadowOffsetY = 3;
     ctx.strokeStyle = isFull ? '#00ff00' : '#00f7ff';
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.arc(circleCenterX, circleCenterY, circleRadius, 0, Math.PI * 2);
     ctx.stroke();
@@ -993,8 +998,10 @@ function drawLaserChargeCircle() {
     ctx.fill();
     
     // Draw percentage text
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
     ctx.fillStyle = isFull ? '#00ff00' : '#00f7ff';
-    ctx.font = 'bold 16px Arial';
+    ctx.font = 'bold 12px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(Math.floor(chargePercent * 100) + '%', circleCenterX, circleCenterY);
@@ -1002,8 +1009,8 @@ function drawLaserChargeCircle() {
     // Draw "LASER" label if full
     if (isFull) {
         ctx.fillStyle = '#ffff00';
-        ctx.font = 'bold 10px Arial';
-        ctx.fillText('CLICK', circleCenterX, circleCenterY + 20);
+        ctx.font = 'bold 8px Arial';
+        ctx.fillText('CLICK', circleCenterX, circleCenterY + 15);
     }
     
     ctx.restore();
@@ -1013,17 +1020,22 @@ function drawLaserChargeCircle() {
 }
 
 function drawUpgradeChargeCircle() {
-    const circleRadius = 45;
-    const circleCenterX = canvas.width - 70;
-    const circleCenterY = canvas.height - 220;
+    const circleRadius = 30;
+    const circleCenterX = 50;
+    const circleCenterY = canvas.height - 80;
     const requiredKills = 15;
     const chargePercent = Math.min(upgradeKills / requiredKills, 1);
     const isFull = chargePercent >= 1;
     const isActive = upgradeActive;
 
     ctx.save();
+    // Add shadow effect
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+    ctx.shadowBlur = 12;
+    ctx.shadowOffsetX = -3;
+    ctx.shadowOffsetY = 3;
     ctx.strokeStyle = isActive ? '#00ff00' : (isFull ? '#00ff00' : '#7dff00');
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.arc(circleCenterX, circleCenterY, circleRadius, 0, Math.PI * 2);
     ctx.stroke();
@@ -1035,20 +1047,23 @@ function drawUpgradeChargeCircle() {
     ctx.lineTo(circleCenterX, circleCenterY);
     ctx.fill();
 
+    // Remove shadow for text rendering
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
     ctx.fillStyle = isActive ? '#00ff00' : (isFull ? '#00ff00' : '#7dff00');
-    ctx.font = 'bold 16px Arial';
+    ctx.font = 'bold 12px Arial';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(isActive ? 'ON' : Math.floor(chargePercent * 100) + '%', circleCenterX, circleCenterY);
 
     ctx.fillStyle = '#ffff00';
-    ctx.font = 'bold 10px Arial';
-    ctx.fillText(isActive ? 'UPGRADED' : (isFull ? 'CLICK' : 'UPGRADE'), circleCenterX, circleCenterY + 20);
+    ctx.font = 'bold 8px Arial';
+    ctx.fillText(isActive ? 'UPGRADED' : (isFull ? 'CLICK' : 'UPGRADE'), circleCenterX, circleCenterY + 15);
 
     // Label above circle
     if (!isActive && !upgradeUsed) {
         ctx.fillStyle = 'rgba(125,255,0,0.85)';
-        ctx.font = 'bold 9px Arial';
+        ctx.font = 'bold 8px Arial';
         ctx.fillText('15 KILLS', circleCenterX, circleCenterY - circleRadius - 6);
     }
 
@@ -1529,6 +1544,7 @@ function stopBossAudio() {
     if (bossMusic) { bossMusic.pause(); bossMusic.currentTime = 0; bossMusic.muted = true; }
     if (phase5EntranceSound) { phase5EntranceSound.pause(); phase5EntranceSound.currentTime = 0; phase5EntranceSound.muted = true; }
     if (finalBossEntranceSound) { finalBossEntranceSound.pause(); finalBossEntranceSound.currentTime = 0; finalBossEntranceSound.muted = true; }
+    if (finalBossKilledSound) { finalBossKilledSound.pause(); finalBossKilledSound.currentTime = 0; finalBossKilledSound.muted = true; }
     activeBossTrack = null;
     bossThemePlaying = false;
 }
